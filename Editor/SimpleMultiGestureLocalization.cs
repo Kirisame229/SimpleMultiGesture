@@ -14,7 +14,8 @@ namespace SimpleMultiGestureTool.Editor
 
     internal static class SimpleMultiGestureLocalization
     {
-        private const string BasePath = "Packages/me.kirisame.smg/Editor/Localization/";
+        private const string BasePath =
+            "Packages/me.kirisame.simple-multi-gesture/Editor/Localization/";
         private const string EditorPrefsKey = "me.kirisame.smg.language";
         private const SimpleMultiGestureLanguage FallbackLanguage =
             SimpleMultiGestureLanguage.Japanese;

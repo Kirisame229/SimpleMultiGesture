@@ -31,7 +31,6 @@ namespace SimpleMultiGestureTool
 
         public bool writeDefaults = true;
         public int layerPriority;
-        public bool removeOriginalHandGestureLayers;
         public float transitionDuration = DefaultTransitionDuration;
         public float transitionOffset = DefaultTransitionOffset;
 

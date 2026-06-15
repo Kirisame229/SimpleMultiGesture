@@ -10,7 +10,6 @@ namespace SimpleMultiGestureTool.Editor
     [CustomEditor(typeof(SimpleMultiGesture))]
     internal sealed class SimpleMultiGestureEditor : UnityEditor.Editor
     {
-        private const float GestureLabelWidth = 126f;
         private const float CombinationNameWidth = 150f;
         private const float DeleteButtonWidth = 54f;
         private const float GestureSelectorSpacing = 5f;
@@ -21,7 +20,6 @@ namespace SimpleMultiGestureTool.Editor
 
         private SerializedProperty _defaultClips;
         private SerializedProperty _combinations;
-        private SerializedProperty _removeOriginalHandGestureLayers;
         private SerializedProperty _writeDefaults;
         private SerializedProperty _layerPriority;
         private SerializedProperty _transitionDuration;
@@ -37,8 +35,6 @@ namespace SimpleMultiGestureTool.Editor
         {
             _defaultClips = serializedObject.FindProperty(nameof(SimpleMultiGesture.defaultClips));
             _combinations = serializedObject.FindProperty(nameof(SimpleMultiGesture.combinations));
-            _removeOriginalHandGestureLayers = serializedObject.FindProperty(
-                nameof(SimpleMultiGesture.removeOriginalHandGestureLayers));
             _writeDefaults = serializedObject.FindProperty(nameof(SimpleMultiGesture.writeDefaults));
             _layerPriority =
                 serializedObject.FindProperty(nameof(SimpleMultiGesture.layerPriority));
@@ -121,13 +117,12 @@ namespace SimpleMultiGestureTool.Editor
                     SimpleMultiGestureGestureCatalog.Name(gesture),
                     SimpleMultiGestureGestureCatalog.Name(gesture));
 
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    EditorGUILayout.LabelField(content, GUILayout.Width(GestureLabelWidth));
-                    EditorGUILayout.PropertyField(clipProperty, GUIContent.none);
-                }
+                EditorGUILayout.PropertyField(clipProperty, content);
 
-                DrawClipIssues(clipProperty.objectReferenceValue as AnimationClip, avatarRoot);
+                DrawClipIssues(
+                    clipProperty.objectReferenceValue as AnimationClip,
+                    avatarRoot,
+                    EditorGUIUtility.labelWidth);
             }
         }
 
@@ -309,18 +304,6 @@ namespace SimpleMultiGestureTool.Editor
             EditorGUILayout.PropertyField(
                 _layerPriority,
                 SimpleMultiGestureLocalization.Label("layerPriority"));
-            EditorGUILayout.PropertyField(
-                _removeOriginalHandGestureLayers,
-                SimpleMultiGestureLocalization.Label("removeOriginalHandGestureLayers"));
-            if (_removeOriginalHandGestureLayers.boolValue)
-            {
-                var descriptor = SimpleMultiGestureHierarchy.FindAvatarDescriptor(
-                    (SimpleMultiGesture)target);
-                var analysis = SimpleMultiGestureHandLayerDetector.Analyze(descriptor);
-                EditorGUILayout.HelpBox(
-                    SimpleMultiGestureLocalization.Text(analysis.MessageKey),
-                    analysis.CanRemove ? MessageType.Info : MessageType.Warning);
-            }
 
             _transitionDuration.floatValue = Mathf.Max(
                 0f,
@@ -364,7 +347,7 @@ namespace SimpleMultiGestureTool.Editor
         private void DrawClipIssues(
             AnimationClip clip,
             GameObject avatarRoot,
-            float leftPadding = GestureLabelWidth)
+            float leftPadding)
         {
             if (clip == null)
             {
