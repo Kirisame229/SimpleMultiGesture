@@ -14,6 +14,7 @@
     { "key": "deleteCombination", "value": "削除" },
     { "key": "advancedOptions", "value": "詳細設定" },
     { "key": "writeDefaults", "value": "Write Defaults" },
+    { "key": "layerPriority", "value": "レイヤー優先度" },
     { "key": "removeOriginalHandGestureLayers", "value": "元の FX ハンドレイヤーを無効化" },
     { "key": "handLayersDetected", "value": "元の FX の「Left Hand」と「Right Hand」を安全に特定しました。ビルド後のアバターからのみ削除されます。" },
     { "key": "handLayersNoCustomFx", "value": "通常のカスタム FX Animator Controller が使用されていないため、ハンドレイヤーを削除しませんでした。" },

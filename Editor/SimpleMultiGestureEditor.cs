@@ -23,6 +23,7 @@ namespace SimpleMultiGestureTool.Editor
         private SerializedProperty _combinations;
         private SerializedProperty _removeOriginalHandGestureLayers;
         private SerializedProperty _writeDefaults;
+        private SerializedProperty _layerPriority;
         private SerializedProperty _transitionDuration;
         private SerializedProperty _transitionOffset;
 
@@ -39,6 +40,8 @@ namespace SimpleMultiGestureTool.Editor
             _removeOriginalHandGestureLayers = serializedObject.FindProperty(
                 nameof(SimpleMultiGesture.removeOriginalHandGestureLayers));
             _writeDefaults = serializedObject.FindProperty(nameof(SimpleMultiGesture.writeDefaults));
+            _layerPriority =
+                serializedObject.FindProperty(nameof(SimpleMultiGesture.layerPriority));
             _transitionDuration =
                 serializedObject.FindProperty(nameof(SimpleMultiGesture.transitionDuration));
             _transitionOffset =
@@ -303,6 +306,9 @@ namespace SimpleMultiGestureTool.Editor
             EditorGUILayout.PropertyField(
                 _writeDefaults,
                 SimpleMultiGestureLocalization.Label("writeDefaults"));
+            EditorGUILayout.PropertyField(
+                _layerPriority,
+                SimpleMultiGestureLocalization.Label("layerPriority"));
             EditorGUILayout.PropertyField(
                 _removeOriginalHandGestureLayers,
                 SimpleMultiGestureLocalization.Label("removeOriginalHandGestureLayers"));

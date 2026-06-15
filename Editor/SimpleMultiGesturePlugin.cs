@@ -343,7 +343,12 @@ namespace SimpleMultiGestureTool.Editor
             IReadOnlyDictionary<(int Left, int Right), SimpleMultiGestureCombination>
                 combinations)
         {
-            var layer = fxController.AddLayer(new LayerPriority(228),LayerName);
+            var layerPriority = configuration.layerPriority == 0
+                ? SimpleMultiGesture.DefaultLayerPriority
+                : configuration.layerPriority;
+            var layer = fxController.AddLayer(
+                new LayerPriority(layerPriority),
+                LayerName);
             layer.DefaultWeight = 1f;
             layer.BlendingMode = AnimatorLayerBlendingMode.Override;
             layer.AvatarMask = null;

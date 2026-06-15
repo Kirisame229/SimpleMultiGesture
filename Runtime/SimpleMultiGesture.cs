@@ -21,6 +21,7 @@ namespace SimpleMultiGestureTool
         public const int GestureCount = 8;
         public const int FirstCombinationLeftGesture = 1;
         public const int LastGesture = 7;
+        public const int DefaultLayerPriority = 229;
         public const float DefaultTransitionDuration = 0.1f;
         public const float DefaultTransitionOffset = 0f;
 
@@ -29,6 +30,7 @@ namespace SimpleMultiGestureTool
             new List<SimpleMultiGestureCombination>();
 
         public bool writeDefaults = true;
+        public int layerPriority;
         public bool removeOriginalHandGestureLayers;
         public float transitionDuration = DefaultTransitionDuration;
         public float transitionOffset = DefaultTransitionOffset;

@@ -14,6 +14,7 @@
     { "key": "deleteCombination", "value": "Delete" },
     { "key": "advancedOptions", "value": "Advanced Options" },
     { "key": "writeDefaults", "value": "Write Defaults" },
+    { "key": "layerPriority", "value": "Layer Priority" },
     { "key": "removeOriginalHandGestureLayers", "value": "Disable original FX hand layers" },
     { "key": "handLayersDetected", "value": "The original FX layers 'Left Hand' and 'Right Hand' were safely identified and will be removed only from the built avatar." },
     { "key": "handLayersNoCustomFx", "value": "The hand layers were not removed because the avatar does not use a custom regular FX Animator Controller." },
