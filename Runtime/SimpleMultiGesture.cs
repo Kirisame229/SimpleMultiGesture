@@ -29,6 +29,7 @@ namespace SimpleMultiGestureTool
             new List<SimpleMultiGestureCombination>();
 
         public bool writeDefaults = true;
+        public bool removeOriginalHandGestureLayers;
         public float transitionDuration = DefaultTransitionDuration;
         public float transitionOffset = DefaultTransitionOffset;
 

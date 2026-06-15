@@ -12,9 +12,104 @@ using VRC.SDK3.Avatars.Components;
 using Object = UnityEngine.Object;
 
 [assembly: ExportsPlugin(typeof(SimpleMultiGestureTool.Editor.SimpleMultiGesturePlugin))]
+[assembly: ExportsPlugin(typeof(SimpleMultiGestureTool.Editor.SimpleMultiGestureHandLayerRemovalPlugin))]
 
 namespace SimpleMultiGestureTool.Editor
 {
+    [RunsOnPlatforms(WellKnownPlatforms.VRChatAvatar30)]
+    internal sealed class SimpleMultiGestureHandLayerRemovalPlugin
+        : Plugin<SimpleMultiGestureHandLayerRemovalPlugin>
+    {
+        public override string QualifiedName => "me.kirisame.smg.remove-hand-layers";
+        public override string DisplayName => "SimpleMultiGesture Hand Layer Removal";
+
+        protected override void Configure()
+        {
+            InPhase(BuildPhase.Transforming)
+                .BeforePlugin("nadena.dev.modular-avatar")
+                .WithRequiredExtension(typeof(AnimatorServicesContext), sequence =>
+                {
+                    sequence.Run(
+                        "Disable original FX hand gesture layers",
+                        RemoveOriginalHandGestureLayers);
+                });
+        }
+
+        private static void RemoveOriginalHandGestureLayers(BuildContext context)
+        {
+            var avatarRoot = context.AvatarRootObject;
+            var descriptor = avatarRoot.GetComponent<VRCAvatarDescriptor>();
+            if (descriptor == null)
+            {
+                return;
+            }
+
+            var configurations = avatarRoot
+                .GetComponentsInChildren<SimpleMultiGesture>(true)
+                .Where(component =>
+                    SimpleMultiGestureHierarchy.IsBuildEnabled(component, descriptor))
+                .ToArray();
+            if (configurations.Length != 1
+                || !configurations[0].removeOriginalHandGestureLayers)
+            {
+                return;
+            }
+
+            var analysis = SimpleMultiGestureHandLayerDetector.Analyze(descriptor);
+            if (!analysis.CanRemove)
+            {
+                SimpleMultiGesturePlugin.Report(
+                    ErrorSeverity.NonFatal,
+                    SimpleMultiGestureLocalization.Text(analysis.MessageKey));
+                return;
+            }
+
+            var controllerContext =
+                context.Extension<AnimatorServicesContext>().ControllerContext;
+            if (!controllerContext.Controllers.TryGetValue(
+                    VRCAvatarDescriptor.AnimLayerType.FX,
+                    out var fxController)
+                || fxController == null)
+            {
+                SimpleMultiGesturePlugin.Report(
+                    ErrorSeverity.NonFatal,
+                    SimpleMultiGestureLocalization.Text("handLayersVirtualMismatch"));
+                return;
+            }
+
+            var targets = fxController.Layers
+                .Where(layer =>
+                    layer.IsOriginalLayer
+                    && (layer.OriginalPhysicalLayerIndex == analysis.LeftLayerIndex
+                        || layer.OriginalPhysicalLayerIndex == analysis.RightLayerIndex))
+                .ToArray();
+            var hasLeft = targets.Any(layer =>
+                layer.OriginalPhysicalLayerIndex == analysis.LeftLayerIndex
+                && string.Equals(
+                    layer.Name,
+                    SimpleMultiGestureHandLayerDetector.LeftLayerName,
+                    StringComparison.Ordinal));
+            var hasRight = targets.Any(layer =>
+                layer.OriginalPhysicalLayerIndex == analysis.RightLayerIndex
+                && string.Equals(
+                    layer.Name,
+                    SimpleMultiGestureHandLayerDetector.RightLayerName,
+                    StringComparison.Ordinal));
+            if (targets.Length != 2 || !hasLeft || !hasRight)
+            {
+                SimpleMultiGesturePlugin.Report(
+                    ErrorSeverity.NonFatal,
+                    SimpleMultiGestureLocalization.Text("handLayersVirtualMismatch"));
+                return;
+            }
+
+            foreach (var layer in targets)
+            {
+                fxController.RemoveLayer(layer);
+            }
+        }
+    }
+
     [RunsOnPlatforms(WellKnownPlatforms.VRChatAvatar30)]
     internal sealed class SimpleMultiGesturePlugin : Plugin<SimpleMultiGesturePlugin>
     {
@@ -248,9 +343,7 @@ namespace SimpleMultiGestureTool.Editor
             IReadOnlyDictionary<(int Left, int Right), SimpleMultiGestureCombination>
                 combinations)
         {
-            var layer = fxController.AddLayer(
-                new LayerPriority(int.MaxValue),
-                LayerName);
+            var layer = fxController.AddLayer(new LayerPriority(228),LayerName);
             layer.DefaultWeight = 1f;
             layer.BlendingMode = AnimatorLayerBlendingMode.Override;
             layer.AvatarMask = null;
@@ -534,7 +627,7 @@ namespace SimpleMultiGestureTool.Editor
             return depth;
         }
 
-        private static void Report(ErrorSeverity severity, string message)
+        internal static void Report(ErrorSeverity severity, string message)
         {
             ErrorReport.ReportError(new SimpleMultiGestureBuildMessage(severity, message));
         }

@@ -16,10 +16,12 @@ namespace SimpleMultiGestureTool.Editor
         private const float GestureSelectorSpacing = 5f;
         private const float MajorSectionSpacing = 20f;
         private const float TargetAvatarSpacing = 10f;
+        private const float AdvancedOptionLabelWidth = 220f;
         private const string AdvancedFoldoutKeyPrefix = "me.kirisame.smg.advanced.";
 
         private SerializedProperty _defaultClips;
         private SerializedProperty _combinations;
+        private SerializedProperty _removeOriginalHandGestureLayers;
         private SerializedProperty _writeDefaults;
         private SerializedProperty _transitionDuration;
         private SerializedProperty _transitionOffset;
@@ -34,6 +36,8 @@ namespace SimpleMultiGestureTool.Editor
         {
             _defaultClips = serializedObject.FindProperty(nameof(SimpleMultiGesture.defaultClips));
             _combinations = serializedObject.FindProperty(nameof(SimpleMultiGesture.combinations));
+            _removeOriginalHandGestureLayers = serializedObject.FindProperty(
+                nameof(SimpleMultiGesture.removeOriginalHandGestureLayers));
             _writeDefaults = serializedObject.FindProperty(nameof(SimpleMultiGesture.writeDefaults));
             _transitionDuration =
                 serializedObject.FindProperty(nameof(SimpleMultiGesture.transitionDuration));
@@ -292,9 +296,25 @@ namespace SimpleMultiGestureTool.Editor
             }
 
             EditorGUI.indentLevel++;
+            var previousLabelWidth = EditorGUIUtility.labelWidth;
+            EditorGUIUtility.labelWidth = Mathf.Max(
+                previousLabelWidth,
+                AdvancedOptionLabelWidth);
             EditorGUILayout.PropertyField(
                 _writeDefaults,
                 SimpleMultiGestureLocalization.Label("writeDefaults"));
+            EditorGUILayout.PropertyField(
+                _removeOriginalHandGestureLayers,
+                SimpleMultiGestureLocalization.Label("removeOriginalHandGestureLayers"));
+            if (_removeOriginalHandGestureLayers.boolValue)
+            {
+                var descriptor = SimpleMultiGestureHierarchy.FindAvatarDescriptor(
+                    (SimpleMultiGesture)target);
+                var analysis = SimpleMultiGestureHandLayerDetector.Analyze(descriptor);
+                EditorGUILayout.HelpBox(
+                    SimpleMultiGestureLocalization.Text(analysis.MessageKey),
+                    analysis.CanRemove ? MessageType.Info : MessageType.Warning);
+            }
 
             _transitionDuration.floatValue = Mathf.Max(
                 0f,
@@ -307,6 +327,7 @@ namespace SimpleMultiGestureTool.Editor
                 _transitionOffset.floatValue,
                 0f,
                 1f);
+            EditorGUIUtility.labelWidth = previousLabelWidth;
             EditorGUI.indentLevel--;
         }
 
